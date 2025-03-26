@@ -1,54 +1,72 @@
 //your code here
-document.addEventListener("DOMContentLoaded", () => {
-    const imageContainer = document.getElementById("image-container");
-    const resetButton = document.getElementById("reset");
-    const verifyButton = document.getElementById("verify");
-    const message = document.getElementById("h");
-    const resultMessage = document.getElementById("para");
-    let selectedImages = [];
-    
-    // Image sources
-    const images = ["img1.jpg", "img2.jpg", "img3.jpg", "img4.jpg", "img5.jpg"];
-    let shuffledImages = [...images];
-    const duplicate = images[Math.floor(Math.random() * images.length)];
-    shuffledImages.push(duplicate);
-    shuffledImages = shuffledImages.sort(() => Math.random() - 0.5);
+const images = [
+    "https://picsum.photos/id/237/200/300", 
+    "https://picsum.photos/seed/picsum/200/300", 
+    "https://picsum.photos/200/300?grayscale", 
+    "https://picsum.photos/200/300/", 
+    "https://picsum.photos/200/300.jpg"
+];
 
-    // Render images
+let selectedImages = [];
+let duplicateIndex = Math.floor(Math.random() * images.length);
+
+// Add duplicate image
+const shuffledImages = [...images, images[duplicateIndex]].sort(() => Math.random() - 0.5);
+
+const container = document.getElementById('image-container');
+const resetButton = document.getElementById('reset');
+const verifyButton = document.getElementById('verify');
+const message = document.getElementById('para');
+
+// ✅ Create and display images with correct class names
+function displayImages() {
     shuffledImages.forEach((src, index) => {
-        const img = document.createElement("img");
+        const img = document.createElement('img');
         img.src = src;
-        img.classList.add("tile");
+        img.className = `img${(index % 5) + 1}`; // Assign class names .img1 to .img5
         img.dataset.index = index;
-        img.addEventListener("click", () => selectImage(img));
-        imageContainer.appendChild(img);
+        img.addEventListener('click', () => selectImage(img));
+        container.appendChild(img);
     });
+}
 
-    function selectImage(img) {
-        if (selectedImages.length < 2 && !selectedImages.includes(img)) {
-            selectedImages.push(img);
-            img.classList.add("selected");
-            resetButton.style.display = "block";
-        }
+function selectImage(img) {
+    if (selectedImages.length < 2 && !selectedImages.includes(img)) {
+        img.classList.add('selected');
+        selectedImages.push(img);
+        resetButton.style.display = 'block';
+
         if (selectedImages.length === 2) {
-            verifyButton.style.display = "block";
+            verifyButton.style.display = 'block';
         }
     }
+}
 
-    verifyButton.addEventListener("click", () => {
-        if (selectedImages[0].src === selectedImages[1].src) {
-            resultMessage.textContent = "You are a human. Congratulations!";
+function resetSelection() {
+    selectedImages.forEach(img => img.classList.remove('selected'));
+    selectedImages = [];
+    resetButton.style.display = 'none';
+    verifyButton.style.display = 'none';
+    message.textContent = "";
+}
+
+function verifySelection() {
+    if (selectedImages.length === 2) {
+        const [img1, img2] = selectedImages;
+        if (img1.src === img2.src) {
+            message.textContent = "You are a human. Congratulations!";
+            message.style.color = "green";
         } else {
-            resultMessage.textContent = "We can't verify you as a human. You selected the non-identical tiles.";
+            message.textContent = "We can't verify you as a human. You selected the non-identical tiles.";
+            message.style.color = "red";
         }
-        verifyButton.style.display = "none";
-    });
+        verifyButton.style.display = 'none';
+    }
+}
 
-    resetButton.addEventListener("click", () => {
-        selectedImages.forEach(img => img.classList.remove("selected"));
-        selectedImages = [];
-        resetButton.style.display = "none";
-        verifyButton.style.display = "none";
-        resultMessage.textContent = "";
-    });
-});
+// Event Listeners
+resetButton.addEventListener('click', resetSelection);
+verifyButton.addEventListener('click', verifySelection);
+
+// ✅ Initialize with fixed class names
+displayImages();
